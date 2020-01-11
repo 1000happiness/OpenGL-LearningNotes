@@ -1,4 +1,4 @@
-## 1-HelloWindows
+# 1-HelloWindows
 
 ### 任务一：完成OpenGL的环境配置
 添加GLAD的过程如下：
@@ -10,3 +10,6 @@
 
 ### 任务二：创建窗口
 详情见代码
+
+### 其他
+需要在.gitignore文件中添加.vs
