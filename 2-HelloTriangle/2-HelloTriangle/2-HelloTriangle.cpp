@@ -262,12 +262,12 @@ void createTriangle(unsigned int VAO, unsigned int VBO, float *vertices){
         作用：告诉OpenGL如何解析顶点数据
         要求：已经把相应的VAO进行绑定
         参数：
-            1.数组中顶点属性的位置偏移（与着色器中的程序相对应）——unsigned int
+            1.数组中顶点属性的位置偏移（与着色器中的程序相对应）——unsigned int，这个偏移意味着此时绑定的数据对应的是着色器中的哪一个数据
             2.顶点属性的大小，此处一个顶点由三个坐标构成——unsigned int
             3.顶点的数据类型——enum
             4.定义是否希望数据被标准化——GL_FALSE/GL_TRUE
             5.步长（下个顶点的的出现位置与当前顶点开头的距离）——unsigned int
-            6.表示位置数据在缓冲中起始位置的偏移量——unsigned int
+            6.表示位置数据在缓冲中起始位置的偏移量——unsigned int，此处表示在数组中的偏移量
         补充：
             1.参数1与参数6的区别
             2.调用这个函数本质上是配置了绑定的VAO，这个函数使得VAO间接与VBO联系起来了，所以在后面绘制图像时只需要VAO
