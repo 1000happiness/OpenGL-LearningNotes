@@ -1,8 +1,7 @@
-#include <glad/glad.h>
+﻿#include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
-#include <string>
 
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -10,67 +9,53 @@ void processInput(GLFWwindow *window);
 int main()
 {
     /*
-        ���ã���ʼ��GLFW
-        Ҫ�󣺵�һ��ִ��
+        作用：初始化glfw
     */
     glfwInit();
-    
+   
 
     /*
-        ���ã��Դ��ڽ������� 
-        Ҫ�󣺶Դ��ڵ����ñ���Ҫ�ڴ�������ǰ����
-        ������
-            1.���õĲ������ơ���ͨ��Ϊ�궨���int
-            2.���õ�intֵ����int
-        ���䣺
-            1.��ϸ���òο���https://www.glfw.org/docs/latest/window.html#window_hints
-            2.���Ƶĺ���glfwWindowHintString��������string���͵�����
-            3.GLFW_CONTEXT_VERSION_MAJOR��GLFW_CONTEXT_VERSION_MINOR�൱�ڰ汾��Ϊ3.3
-            4.GLFW_OPENGL_PROFILE��ʾ���е�ģʽ���˴�Ϊ����ģʽ
-            5.�˴��������趨ͨ���Ǳ����
+        作用：配置glfw
+        参数：
+            1.配置的参数@GLenum
+            2.配置的值@int
+        补充：
+            1.具体的配置属性可以参考 https://www.glfw.org/docs/latest/window.html#window_hints
+            2.可以通过glfwWindowHintString配置string类型的变量
+            3.至少需要配置这三个类型的变量：GLFW_CONTEXT_VERSION_MAJOR和GLFW_CONTEXT_VERSION_MINOR是版本号，GLFW_OPENGL_PROFILE是核心模式
     */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /*
-        ���ã��������ڶ�����������д洢�������봰����ص�����
-        ������
-            1.���ȡ���int
-            2.�߶ȡ���int
-            3.���ơ���const char *
-            4.�趨ȫ��Ӧ�õ���Ļ����GLFWwindow *������Ϊnull��
-            5.����һ�����ڹ���context����GLFWwindow *������Ϊnull��
+        作用：创建窗口
+        参数：
+            1.2.窗口的长度和宽度@int
+            3.窗口的名称@const char*
+            4.待补充
+            5.待补充
     */
-    GLFWwindow* window = glfwCreateWindow(800, 600, "1-HelloWindows", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(800, 600, "1-HelloWindows", NULL, NULL);
 
-    /*
-      У��  
-    */
+    /* 检查窗口是否创建成功 */
     if (window == NULL)
     {
         std::cout << "Failed to create GLFW window" << std::endl;
         /*
-            ���ã����ٴ���
+            作用：结束窗口
         */
         glfwTerminate();
         return -1;
     }
 
     /*
-        ���ã����ô��ڵ�������
-        Ҫ����ɴ��ں������ĵ�����
-        ������
-            1.���ڡ���GLFWwindow*
+        作用：配置窗口上下文
     */
     glfwMakeContextCurrent(window);
 
     /*
-        ���ã��ж�glad�Ƿ���ɼ���
-        ������
-            1.���򡪡�GLADloadproc
-        ����ֵ��
-            2.�궨���GL_TRUE����GL_FALSE
+        作用：判断glad是否成功加载
     */
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -79,52 +64,44 @@ int main()
     }
 
     /*
-        ���ã������ӿ�
-        ������
-            1.2.�ӿ����½ǵ�λ�ã�����ڴ��ڣ�
-            3.4.�ӿڵĿ��Ⱥ͸߶�
-        ���䣺
-            1.ʵ�����ӿڿ��Աȴ���С
-            2.���Զ���һ���ص������ڸı䴰�ڴ�С��ʱ��ͬ���ı��ӿڴ�С
+        作用：设置视口
+        参数：
+            1.2.设置视口左下角在窗口的位置@int
+            3.4.设置视口的大小@int
+        补充：
+            1.这个函数需要在的调整窗口大小的时候使用回调函数同步调整视口大小时被调用
     */
     glViewport(0, 0, 800, 600);
 
     /*
-        ���ã����ûص�����
-        Ҫ�󣺻ص������Ѿ������Ҳ��������׼
-        ������
-            1.��صĴ���
-            2.�ص��ĺ���
+        作用：设置回调函数
+        参数：
+            1.窗口@GLFWwindow *
+            2.回调函数指针
     */
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     // end init
 
-    // ��Ⱦѭ��
+    // 进入渲染循环
     /*
-        ���ã���ⴰ���Ƿ��趨Ϊ�ر�
-        ������
-            1.��صĴ��ڡ���GLFWwindow*
+        作用：判断窗口是否输入了结束信号
+        补充：
+            1.窗口输入结束信号的方式有很多，可以是程序内设定，也可以是关闭窗口
     */
     while (!glfwWindowShouldClose(window))
     {
-        // ����
+        /* 作用：接受输入*/
         processInput(window);
 
-        // ��鲢�����¼�����������
         /*
-            ���ã���鲢�����¼�
-            ��������
-            ���䣺
-                1.���������Ѷ��������еĻص�����ȫ��ִ�У������ڼ������߳�
-                2.��������������κλص������б�����
+            作用：执行事件任务
+            补充：
+                1.这个函数会执行完队列中的全部函数
+                2.这个函数不应在回调函数中被调用
         */
         glfwPollEvents();
         /*
-            ���ã���������
-            ������
-                1.��صĴ��ڡ���GLFWwindow*
-            ���䣺
-                1.����������ȴ�GPU�����Ⱦһ��������ٽ��н�������֤���֡����Ⱦ��ɵ�
+            作用：交换帧缓存
         */
         glfwSwapBuffers(window);
     }
@@ -136,11 +113,7 @@ int main()
 }
 
 /*
-    ���ã��ص�������ͬ�������ӿںʹ��ڴ�С
-    Ҫ�󣺲������ͱ���Ҫ��window
-    ������
-        1.��Ӧ��window
-        2.3.���Ⱥ͸߶�
+    作用：自定义的回调函数，用于动态调整
 */
 void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 {
@@ -151,18 +124,16 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height)
 void processInput(GLFWwindow *window)
 {
     /*
-        ���ã����ĳһ�������Ƿ񱻰���
-        ������
-            1.��صĴ��ڡ���GLFWwindow*
-            2.��������GLFWwindow*
-        ����ֵ����������״̬���ֱ��ʾ���£�1����δ���£�0��
+        作用：获取键盘输入
+        参数：
+            1.窗口@GLFWwindow *
+            2.输入的按键@GLenum
+        补充：
+            1.glfw只有两个按键状态，按下（不用松开）和不按下，glfw把长按松开之类的操作交于用户实现
     */
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
         /*
-            ���ã��趨����״̬
-            ������
-                1.��صĴ��ڡ���GLFWwindow*
-                2.�Ƿ�رա���bool
+            作用：设定窗口状态
         */
 }

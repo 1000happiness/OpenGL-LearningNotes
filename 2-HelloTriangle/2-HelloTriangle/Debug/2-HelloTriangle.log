@@ -1,2 +1,6 @@
-﻿  2-HelloTriangle.cpp
+﻿  Point.cpp
+  2-HelloTriangle.cpp
+f:\opengl\note\2-hellotriangle\2-hellotriangle\2-hellotriangle.cpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  Triangle.cpp
+  正在生成代码...
   2-HelloTriangle.vcxproj -> F:\OpenGL\note\2-HelloTriangle\Debug\2-HelloTriangle.exe

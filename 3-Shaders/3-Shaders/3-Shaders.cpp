@@ -6,13 +6,17 @@
 
 #include "../../public//Shader//ShaderProgram.h"
 
-/* ×ÅÉ«Æ÷ÓïÑÔµÄÏà¹ØÓï·¨ÔÚ±Ê¼ÇÖĞ³ÊÏÖ£¬´Ë´¦Ö»¼ÇÂ¼ÈçºÎ±àÒëºÍÁ´½Ó×ÅÉ«Æ÷ */
+/* ç€è‰²å™¨è¯­è¨€çš„å…·ä½“å†™æ³•åœ¨ç¬”è®°ä¸­è®°å½•ï¼Œæ­¤å¤„åªè®°å½•è°ƒç”¨æ–¹å¼ */
 
 const char *vertexShaderSource = "#version 330 core \n"
-"layout(location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"out vec3 ourColor;\n"
-"void main(){gl_Position = vec4(aPos, 1.0); ourColor = aColor; }";
+    "layout(location = 0) in vec3 aPos;\n"
+    "layout (location = 1) in vec3 aColor;\n"
+    "out vec3 ourColor;\n"
+    "void main()\n"
+    "{\n"
+    "gl_Position = vec4(aPos, 1.0);\n"
+    "ourColor = aColor;\n"
+    "}\n\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
     "out vec4 FragColor;\n"
@@ -53,13 +57,12 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     // end init
 
-    // ÅäÖÃ×ÅÉ«Æ÷£¬´Ë½ÚµÄÖØµã²¿·Ö
+    // è°ƒç”¨å®Œæˆçš„ç€è‰²å™¨ç¨‹åº
     ShaderProgram shaderProgram;
     shaderProgram.addShader(GL_VERTEX_SHADER, vertexShaderSource, ShaderProgram::SourceType::STRING);
     shaderProgram.addShader(GL_FRAGMENT_SHADER, fragmentShaderSource, ShaderProgram::SourceType::STRING);
     shaderProgram.link();
 
-    // ´´½¨Èı½ÇĞÎ£¬Ò»¸ö²»»á¸ü¸ÄµÄÈı½ÇĞÎµÄ¶ÔÏóÊ¹ÓÃVAO¾Í¿ÉÒÔ±êÊ¶
     unsigned int ID = 1;
     unsigned int VAO;
     glGenVertexArrays(ID, &VAO);
@@ -75,8 +78,8 @@ int main()
         0.0f, 0.5f, 0.0f, 0.0f, 0.0f, 1.0f
     };
 
-    unsigned int indices[] = { // ×¢ÒâË÷Òı´Ó0¿ªÊ¼! 
-        0, 1, 2, // µÚÒ»¸öÈı½ÇĞÎ
+    unsigned int indices[] = { 
+        0, 1, 2, 
     };
     
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -94,11 +97,10 @@ int main()
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    float value[] = { 0.0f, 0.0f, 0.0f };
-    //äÖÈ¾Ñ­»·
+    float value[] = { 1.0f, 0.0f, 0.0f };
+
     while (!glfwWindowShouldClose(window))
     {
-        // ÊäÈë
         processInput(window);
 
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);

@@ -26,19 +26,19 @@ bool ShaderProgram::link(){
     /*
         作用：获取是否链接成功
         参数：
-            1.着色器程序ID——int
-            2.状态值——GLenum
-            3.是否成功链接（地址传递）——int *
+            1.着色器程序ID@int
+            2.状态值@GLenum
+            3.是否成功链接（地址传递）@int *
     */
     glGetProgramiv(ID, GL_LINK_STATUS, &success);
     if (!success) {
         /*
             作用：获取详细日志信息
             参数：
-                1.着色器程序ID——int
-                2.日志字符串的大小——int
+                1.着色器程序ID@int
+                2.日志字符串的大小@int
                 3.待补充
-                4.待填写的日志字符串——char *
+                4.待填写的日志字符串@char *
         */
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
@@ -95,7 +95,7 @@ bool ShaderProgram::setUniformValue(const char * name, bool *value, int number){
     /*
         作用：获取uniform数据的ID，后面可以根据这个ID更改相应的uniform的值
         参数：
-            1.着色器程序——int
+            1.着色器程序@int
             2.uniform变量名
         补充：
             1.这个函数如果返回-1表示在程序中不存在这个变量
@@ -198,9 +198,9 @@ bool ShaderProgram::addStringShader(GLenum shaderType, const char * source){
     /*
         作用：将源代码附着到着色器上
         参数：
-            1.着色器ID——int
-            2.着色器程序的数量——int
-            3.着色器源程序——char **
+            1.着色器ID@int
+            2.着色器程序的数量@int
+            3.着色器源程序@char **
             4.待补充
     */
     glShaderSource(shader, 1, &source, NULL);
