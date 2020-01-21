@@ -32,6 +32,8 @@ public:
     bool setUniformValue(const char * name, int *value, int number);
     bool setUniformValue(const char * name, float *value, int number);
 
+    bool setUniformMatrixValue(const char *name, float *value, int number);
+
     ShaderProgram();
     ~ShaderProgram();
 };

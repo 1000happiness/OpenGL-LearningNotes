@@ -5,7 +5,7 @@
 #include <GLFW/glfw3.h>
 
 #include "../../public//Shader/ShaderProgram.h"
-#include "../../public/stb-image/stb_image.h"
+#include "../../public/stb_image/stb_image.h"
 
 /* 着色器语言的具体写法在笔记中记录，此处只记录调用方式 */
 

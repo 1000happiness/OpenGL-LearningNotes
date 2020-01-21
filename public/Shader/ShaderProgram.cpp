@@ -190,6 +190,41 @@ bool ShaderProgram::setUniformValue(const char * name, float *value, int number)
     return true;
 }
 
+bool ShaderProgram::setUniformMatrixValue(const char *name, float *value, int size) {
+    if (size < 2 || size > 4) {
+        return false;
+    }
+
+    int uniformID = glGetUniformLocation(ID, name);
+    if (uniformID == -1) {
+        return false;
+    }
+
+    switch (size) {
+        break;
+    case 2:
+        /*
+            作用：传送uniform矩阵的值
+            参数：
+                1.uniformID@int
+                2.传送矩阵的数量@int
+                3.是否需要转置@bool
+                4.矩阵值@float *
+        */
+        glUniformMatrix2fv(uniformID, 1, GL_FALSE, value);
+        break;
+    case 3:
+        glUniformMatrix3fv(uniformID, 1, GL_FALSE, value);
+        break;
+    case 4:
+        glUniformMatrix4fv(uniformID, 1, GL_FALSE, value);
+        break;
+    default:
+        break;
+    }
+    return true;
+}
+
 bool ShaderProgram::addStringShader(GLenum shaderType, const char * source){
     /*
         作用：根据类型生成着色器
