@@ -1,10 +1,12 @@
-ï»¿#include <iostream>
+#include <iostream>
 #include <string>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
 #include "../../public/stb_image/stb_image.h"
+
+#include "../../public/glm/ext.hpp"
 #include "../../public/glm/vec3.hpp"
 #include "../../public/glm/mat4x4.hpp"
 #include "../../public/glm/trigonometric.hpp"
@@ -14,25 +16,23 @@
 #include "../../public//Shader/ShaderProgram.h"
 
 
-/* ç€è‰²å™¨è¯­è¨€çš„å…·ä½“å†™æ³•åœ¨ç¬”è®°ä¸­è®°å½•ï¼Œæ­¤å¤„åªè®°å½•è°ƒç”¨æ–¹å¼ï¼Œæ‰€æœ‰glmç›¸å…³çš„å‡½æ•°å¯ä»¥æŸ¥é˜…å‚è€ƒæ–‡æ¡£ï¼Œæ­¤å¤„ä¹Ÿä¸ç»™å‡ºè°ƒç”¨æ–¹å¼ */
+/* ×ÅÉ«Æ÷ÓïÑÔµÄ¾ßÌåĞ´·¨ÔÚ±Ê¼ÇÖĞ¼ÇÂ¼£¬´Ë´¦Ö»¼ÇÂ¼µ÷ÓÃ·½Ê½ */
 
 const char *vertexShaderSource = "#version 330 core \n"
 "layout(location = 0) in vec3 aPos;\n"
-"layout (location = 1) in vec3 aColor;\n"
-"layout (location = 2) in vec2 aTexCoord;\n"
-"out vec3 ourColor;\n"
+"layout (location = 1) in vec2 aTexCoord;\n"
 "out vec2 TexCoord;\n"
-"uniform mat4 transform;\n"
+"uniform mat4 model;\n"
+"uniform mat4 view;\n"
+"uniform mat4 projection;\n"
 "void main()\n"
 "{\n"
-"gl_Position = transform * vec4(aPos, 1.0f);\n"
-"ourColor = aColor;\n"
+"gl_Position = projection * view * model * vec4(aPos, 1.0f);\n"
 "TexCoord = aTexCoord;\n"
 "}\n\0";
 
 const char *fragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
-"in vec3 ourColor;\n"
 "in vec2 TexCoord;\n"
 "uniform sampler2D texture1;\n"
 "uniform sampler2D texture2;\n"
@@ -44,25 +44,29 @@ const char *fragmentShaderSource = "#version 330 core\n"
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 void processInput(GLFWwindow *window);
 
-GLFWwindow* init();
+GLFWwindow* init(int screenWidth, int screenHeight);
 ShaderProgram makeShaderProgramme();
 
 int main()
 {
-    /* åˆå§‹åŒ– */
-    GLFWwindow* window = init();
+    /* ³õÊ¼»¯ */
+    int screenWidth = 800, screenHeight = 600;
+    GLFWwindow* window = init(screenWidth, screenHeight);
     if (window == NULL) {
         std::cout << "Failed to create GLFW window" << std::endl;
         return -1;
     }
 
-    /* ç”Ÿæˆç€è‰²å™¨ç¨‹åº*/
+    /* ½øĞĞ¶îÍâµÄÅäÖÃ */
+    glEnable(GL_DEPTH_TEST);
+
+    /* Éú³É×ÅÉ«Æ÷³ÌĞò*/
     ShaderProgram shaderProgram = makeShaderProgramme();
 
-    /* æ³¨å†Œå›¾å½¢ID */
+    /* ×¢²áÍ¼ĞÎID */
     unsigned int ID = 1;
 
-    /* æ·»åŠ çº¹ç† */
+    /* Ìí¼ÓÎÆÀí */
     int width1, height1, nrChannels1;
     stbi_set_flip_vertically_on_load(true);
     unsigned char *data1 = stbi_load("../../image/awesomeface.png", &width1, &height1, &nrChannels1, 0);
@@ -83,12 +87,12 @@ int main()
     }
     stbi_image_free(data1);
 
-    /* ç”Ÿæˆç¬¬äºŒä¸ªçº¹ç† */
+    /* Éú³ÉµÚ¶ş¸öÎÆÀí */
     unsigned int texture2;
     int width2, height2, nrChannels2;
     glGenTextures(1, &texture2);
     glBindTexture(GL_TEXTURE_2D, texture2);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -102,77 +106,131 @@ int main()
     }
     stbi_image_free(data2);
 
-    /* ç”Ÿæˆä¸‰è§’å½¢ */
+    /* Éú³ÉÈı½ÇĞÎ */
     unsigned int VAO;
     unsigned int VBO;
     unsigned int EBO;
 
     glGenVertexArrays(ID, &VAO);
     glGenBuffers(ID, &VBO);
-    glGenBuffers(ID, &EBO);
 
     glBindVertexArray(VAO);
     float vertices[] = {
-        //---- ä½ç½® ----       ---- é¢œè‰² ----     - çº¹ç†åæ ‡ -
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // å³ä¸Š
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // å³ä¸‹
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // å·¦ä¸‹
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // å·¦ä¸Š
-    };
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-    unsigned int indices[] = {
-        0, 1, 3,
-        1, 2, 3,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, 32 * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(unsigned int), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    /* é…ç½®çº¹ç†å•å…ƒ */
-    glUseProgram(shaderProgram.getID());
+    /* ÅäÖÃÎÆÀíµ¥Ôª */
+    shaderProgram.use();
     int value1[] = { 0 };
     shaderProgram.setUniformValue("texture1", value1, 1);
     int value2[] = { 1 };
     shaderProgram.setUniformValue("texture2", value2, 1);
-    
+
+    glm::vec3 cubePositions[] = {
+        glm::vec3(0.0f,  0.0f,  0.0f),
+        glm::vec3(2.0f,  5.0f, -15.0f),
+        glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f),
+        glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f,  3.0f, -7.5f),
+        glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f,  2.0f, -2.5f),
+        glm::vec3(1.5f,  0.2f, -1.5f),
+        glm::vec3(-1.3f,  1.0f, -1.5f)
+    };
 
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
-        /* çª—å£é¢œè‰² */
+        /* ´°¿ÚÑÕÉ« */
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        /* é…ç½®çº¹ç† */
+        /* ÅäÖÃÎÆÀí */
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture1);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
-        /* å˜æ¢ */
-        glm::mat4 trans(1.0f);
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
-        shaderProgram.setUniformMatrixValue("transform", glm::value_ptr(trans), 4);
+        shaderProgram.use();
 
-        /* ç»˜åˆ¶ */
-        glUseProgram(shaderProgram.getID());
+        /* ±ä»» */
+        glm::mat4 model(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        shaderProgram.setUniformMatrixValue("model", glm::value_ptr(model), 4);
+
+        glm::mat4 view(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        shaderProgram.setUniformMatrixValue("view", glm::value_ptr(view), 4);
+        
+        glm::mat4 projection(1.0f);
+        projection = glm::perspective(glm::radians(45.0f), (float) screenWidth / (float)screenHeight, 0.1f, 100.0f);
+        shaderProgram.setUniformMatrixValue("projection", glm::value_ptr(projection), 4);
+
+        /* »æÖÆ */
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        for (unsigned int i = 0; i < 10; i++)
+        {
+            glm::mat4 model(1.0f);
+            model = glm::translate(model, cubePositions[i]);
+            float angle = 20.0f * i;
+            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+            shaderProgram.setUniformMatrixValue("model", glm::value_ptr(model), 4);
+
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        }
         glBindVertexArray(0);
 
         glfwSwapBuffers(window);
@@ -200,7 +258,7 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
 }
 
-GLFWwindow* init() {
+GLFWwindow* init(int screenWidth, int screenHeight) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -222,7 +280,7 @@ GLFWwindow* init() {
         return NULL;
     }
 
-    glViewport(0, 0, 800, 600);
+    glViewport(0, 0, screenWidth, screenHeight);
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 
     return window;
